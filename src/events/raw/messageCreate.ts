@@ -29,6 +29,7 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
     if (config.whitelistedRoles.some((role: string) => msg.member?.roles.cache.has(role))) return; // whitelisted role
 
     if (config.whitelistedMembers.includes(msg.author.id)) return; // whitelisted member
+
     const doIGotPermsManageMessagesPerms = msg.guild?.members.me?.permissions.has(PermissionFlagsBits.ManageMessages);
 
     if (doIGotPermsManageMessagesPerms) msg.delete().catch((err) => {
@@ -52,7 +53,7 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
         }
 
         case "timeout": {
-            const doIGotPerms = msg.member?.permissions.has(PermissionFlagsBits.ModerateMembers);
+            const doIGotPerms = msg.guild?.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers);
 
             if (doIGotPerms) {
                 if (msg.member?.moderatable) {
@@ -73,11 +74,12 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
                 }
             }
 
+
             break;
         }
 
         case "kick": {
-            const doIGotPerms = msg.member?.permissions.has(PermissionFlagsBits.KickMembers);
+            const doIGotPerms = msg.guild?.members.me?.permissions.has(PermissionFlagsBits.KickMembers);
 
             if (doIGotPerms) {
                 if (msg.member?.kickable) {
@@ -102,7 +104,7 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
         }
 
         case "ban": {
-            const doIGotPerms = msg.member?.permissions.has(PermissionFlagsBits.BanMembers);
+            const doIGotPerms = msg.guild?.members.me?.permissions.has(PermissionFlagsBits.BanMembers);
 
             if (doIGotPerms) {
                 if (msg.member?.bannable) {

@@ -106,7 +106,7 @@ export async function execute(client: AntiPolls, interaction: CommandInteraction
             const doIGotPerms = interaction.guild?.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers);
 
             if (!doIGotPerms) {
-                msg = "I don't have the permissions to manage roles, I will not be able to react";
+                msg = "I don't have the permissions to manage members, I will not be able to react";
             }
 
             break;
