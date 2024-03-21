@@ -32,7 +32,7 @@ class AntiPolls extends Client {
 
     public constructor() {
         super({
-            intents: ["MessageContent", "GuildMessages", "Guilds"]
+            intents: ["MessageContent", "GuildMessages", "Guilds", "GuildMembers"]
         });
 
         this.redis.on("close", () => {
