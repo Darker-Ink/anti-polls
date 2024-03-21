@@ -1,0 +1,5 @@
+{ "dependencies": { "discord-api-types": "^0.37.76", "discord.js": "^14.14.1", "ioredis": "^5.3.2" }, "name": "bot", "module": "index.ts", "type": "module", "devDependencies": {
+  "@types/bun": "latest"
+}, "peerDependencies": {
+  "typescript": "^5.0.0"
+} }
