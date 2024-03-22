@@ -36,6 +36,9 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
 
     if (doIGotPermsManageMessagesPerms) msg.delete().catch(client.catch);
 
+    await client.redis.incr("stats")
+    await client.redis.incr(`stats:${msg.guildId}`)
+
     if (!msg.member) return; // nothing else to do
 
     switch (config.punishment) {
