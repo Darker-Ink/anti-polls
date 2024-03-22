@@ -1,4 +1,4 @@
-import { Client, CommandInteraction, GatewayDispatchEvents, type APIApplicationCommandOption } from "discord.js";
+import { Client, CommandInteraction, GatewayDispatchEvents, type APIApplicationCommandOption, EmbedBuilder } from "discord.js";
 import { join } from "path";
 import { readdir, stat } from "node:fs/promises";
 import { Redis } from "ioredis";
@@ -26,7 +26,7 @@ class AntiPolls extends Client {
     });
 
     public commandsFolder = join(import.meta.dirname, "../commands");
-    public eventsFolder = join(import.meta.dirname, "../events");    
+    public eventsFolder = join(import.meta.dirname, "../events");
     private connectAttempts = 0;
     private maxConnectAttempts = 5;
 
@@ -49,7 +49,7 @@ class AntiPolls extends Client {
             console.log("Redis connection established");
 
             this.connectAttempts = 0;
-        })
+        });
     }
 
     public async register() {
@@ -112,6 +112,21 @@ class AntiPolls extends Client {
         })));
 
         return loggedIn;
+    }
+
+    public async catch(err: Error) {
+        const errorEmbed = new EmbedBuilder()
+            .setTitle("Unhandled Rejection")
+            .setDescription(`\`\`\`xl\n${err}\n${new Error().stack}\`\`\``)
+            .setColor("DarkRed")
+            .setTimestamp();
+
+        this.rest.post(process.env.WEBHOOK_URL as `/${string}`, {
+            body: {
+                embeds: [errorEmbed]
+            },
+            auth: false,
+        });
     }
 }
 

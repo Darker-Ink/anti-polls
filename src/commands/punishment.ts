@@ -32,7 +32,7 @@ export const options: APIApplicationCommandOption[] = [
     },
     {
         name: "duration",
-        description: "The duration to timeout for",
+        description: "The duration to timeout for in ms",
         type: ApplicationCommandOptionType.Integer,
         required: false
     }
@@ -56,7 +56,7 @@ export async function execute(client: AntiPolls, interaction: CommandInteraction
             whitelistedChannels: [],
             whitelistedRoles: [],
             whitelistedMembers: [],
-            punishment: "delete", // delete, kick, ban, timeout
+            punishment: "delete",
             timeoutDuration: 0
         };
     }

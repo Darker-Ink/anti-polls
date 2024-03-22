@@ -14,6 +14,8 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
     // @ts-expect-error we are fine creating it
     const msg = new Message(client, data) as Message;
 
+    if (!msg.inGuild()) return;
+
     const guildConfig = await client.redis.get(`config:${msg.guildId}`);
 
     if (!guildConfig) return; // nothing to do
@@ -21,7 +23,7 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
     const config: GuildConfig = JSON.parse(guildConfig);
 
     if (config.whitelistedChannels.some((channel: { id: string, category: boolean; }) => {
-        if (channel.category && "parentId" in msg.channel) return msg.channel.parentId === channel.id;
+        if (channel.category) return msg.channel.parentId === channel.id;
 
         return msg.channel.id === channel.id;
     })) return;
@@ -30,22 +32,11 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
 
     if (config.whitelistedMembers.includes(msg.author.id)) return; // whitelisted member
 
-    const doIGotPermsManageMessagesPerms = msg.guild?.members.me?.permissions.has(PermissionFlagsBits.ManageMessages);
+    const doIGotPermsManageMessagesPerms = msg.guild.members.me?.permissions.has(PermissionFlagsBits.ManageMessages);
 
-    if (doIGotPermsManageMessagesPerms) msg.delete().catch((err) => {
-        const errorEmbed = new EmbedBuilder()
-            .setTitle("Unhandled Rejection")
-            .setDescription(`\`\`\`xl\n${err}\n\`\`\``)
-            .setColor("DarkRed")
-            .setTimestamp();
+    if (doIGotPermsManageMessagesPerms) msg.delete().catch(client.catch);
 
-        client.rest.post(process.env.WEBHOOK_URL as `/${string}`, {
-            body: {
-                embeds: [errorEmbed]
-            },
-            auth: false,
-        });
-    });
+    if (!msg.member) return; // nothing else to do
 
     switch (config.punishment) {
         case "delete": {
@@ -53,50 +44,23 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
         }
 
         case "timeout": {
-            const doIGotPerms = msg.guild?.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers);
+            const doIGotPerms = msg.guild.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers);
 
             if (doIGotPerms) {
-                if (msg.member?.moderatable) {
-                    msg.member?.timeout(config.timeoutDuration === 0 ? 1000 * 60 : config.timeoutDuration, "AntiPolls").catch((err) => {
-                        const errorEmbed = new EmbedBuilder()
-                            .setTitle("Unhandled Rejection")
-                            .setDescription(`\`\`\`xl\n${err}\n\`\`\``)
-                            .setColor("DarkRed")
-                            .setTimestamp();
-
-                        client.rest.post(process.env.WEBHOOK_URL as `/${string}`, {
-                            body: {
-                                embeds: [errorEmbed]
-                            },
-                            auth: false,
-                        });
-                    }); // default to 1 minute
+                if (msg.member.moderatable) {
+                    msg.member.timeout(config.timeoutDuration === 0 ? 1000 * 60 : config.timeoutDuration, "AntiPolls").catch(client.catch); // default to 1 minute
                 }
             }
-
 
             break;
         }
 
         case "kick": {
-            const doIGotPerms = msg.guild?.members.me?.permissions.has(PermissionFlagsBits.KickMembers);
+            const doIGotPerms = msg.guild.members.me?.permissions.has(PermissionFlagsBits.KickMembers);
 
             if (doIGotPerms) {
-                if (msg.member?.kickable) {
-                    msg.member?.kick("AntiPolls").catch((err) => {
-                        const errorEmbed = new EmbedBuilder()
-                            .setTitle("Unhandled Rejection")
-                            .setDescription(`\`\`\`xl\n${err}\n\`\`\``)
-                            .setColor("DarkRed")
-                            .setTimestamp();
-
-                        client.rest.post(process.env.WEBHOOK_URL as `/${string}`, {
-                            body: {
-                                embeds: [errorEmbed]
-                            },
-                            auth: false,
-                        });
-                    });
+                if (msg.member.kickable) {
+                    msg.member.kick("AntiPolls").catch(client.catch);
                 }
             }
 
@@ -104,24 +68,11 @@ export async function run(client: AntiPolls, data: GatewayMessageCreateDispatchD
         }
 
         case "ban": {
-            const doIGotPerms = msg.guild?.members.me?.permissions.has(PermissionFlagsBits.BanMembers);
+            const doIGotPerms = msg.guild.members.me?.permissions.has(PermissionFlagsBits.BanMembers);
 
             if (doIGotPerms) {
-                if (msg.member?.bannable) {
-                    msg.member?.ban({ reason: "AntiPolls" }).catch((err) => {
-                        const errorEmbed = new EmbedBuilder()
-                            .setTitle("Unhandled Rejection")
-                            .setDescription(`\`\`\`xl\n${err}\n\`\`\``)
-                            .setColor("DarkRed")
-                            .setTimestamp();
-
-                        client.rest.post(process.env.WEBHOOK_URL as `/${string}`, {
-                            body: {
-                                embeds: [errorEmbed]
-                            },
-                            auth: false,
-                        });
-                    });
+                if (msg.member.bannable) {
+                    msg.member.ban({ reason: "AntiPolls" }).catch(client.catch);
                 }
             };
 

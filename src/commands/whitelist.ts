@@ -68,7 +68,7 @@ export async function execute(client: AntiPolls, interaction: CommandInteraction
             whitelistedChannels: [],
             whitelistedRoles: [],
             whitelistedMembers: [],
-            punishment: "delete", // delete, kick, ban, timeout
+            punishment: "delete",
             timeoutDuration: 0
         };
     }
@@ -121,6 +121,11 @@ export async function execute(client: AntiPolls, interaction: CommandInteraction
     for (const channel of foundConfig.whitelistedChannels) {
         channels += `<#${channel.id}>, `;
     }
+
+    // ? removes trailing commas
+    members = members.slice(0, -2);
+    roles = roles.slice(0, -2);
+    channels = channels.slice(0, -2);
 
     embed.addFields([
         {
